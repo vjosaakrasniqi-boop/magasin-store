@@ -688,8 +688,7 @@ const runSearch = async (q) => {
       body: JSON.stringify({ query: t, catalog: CATALOG })
     });
     const data = await res.json();
-    if(data.error) throw new Error(data.error.message);
-    const parsed = JSON.parse((data.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim());
+    const parsed = data.results || [];
     setResults(parsed.map(m=>({...PRODUCTS.find(p=>p.id===m.id),reason:m.reason})).filter(p=>p?.id));
   } catch(e) { setError('Something went wrong with the search. Please try again.'); }
   finally { setLoading(false); }

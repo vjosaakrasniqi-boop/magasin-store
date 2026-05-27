@@ -15,18 +15,21 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
-      system: `You are a personal stylist for MAGASIN COLLECTION, a minimalistic editorial luxury fashion store. Match the customer's request to the most suitable products.
-
-OUTPUT: Return ONLY a raw JSON array. No markdown, no backticks, no text outside the array.
-Format: [{"id": 1, "reason": "One warm specific sentence why this fits the request."}]
-Rules: 3-5 products max, genuine matches only, honour budgets, reason sounds like a real stylist. Return [] if nothing fits.`,
+      system: `You are a personal stylist for MAGASIN COLLECTION. Match the customer's request to the most suitable products. Return ONLY a raw JSON array, no markdown, no backticks. Format: [{"id": 1, "reason": "One warm specific sentence."}]. Return 3-5 matches max. Return [] if nothing fits.`,
       messages: [{
         role: 'user',
-        content: `Customer: "${query}"\n\nCatalog:\n${JSON.stringify(catalog, null, 2)}\n\nReturn only the JSON array.`
+        content: `Customer: "${query}"\n\nCatalog:\n${JSON.stringify(catalog)}\n\nReturn only the JSON array.`
       }]
     })
   });
 
   const data = await response.json();
-  res.status(200).json(data);
+  const text = data.content?.[0]?.text || '[]';
+  
+  try {
+    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    return res.status(200).json({ results: parsed });
+  } catch(e) {
+    return res.status(200).json({ results: [] });
+  }
 }
