@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 1000,
       system: `You are a personal stylist for MAGASIN COLLECTION. Match the customer's request to the most suitable products from the catalog. Return ONLY a raw JSON array, no markdown, no backticks, no explanation. Format: [{"id": 1, "reason": "One warm specific sentence why this fits."}]. Return 3-5 genuine matches. Honour any budget mentioned. Return [] if truly nothing fits.`,
       messages: [{
