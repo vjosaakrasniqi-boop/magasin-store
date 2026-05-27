@@ -678,7 +678,22 @@ function SearchPage({ goToProduct }) {
   useEffect(()=>{ inputRef.current?.focus(); },[]);
 
   const CATALOG = PRODUCTS.map(p=>({ id:p.id, name:p.name, category:p.cat, subcategory:p.sub, price:p.sale||p.price, originalPrice:p.price, onSale:!!p.sale, colors:p.colors, sizes:p.sizes, tags:p.tags, description:p.desc }));
-
+const runSearch = async (q) => {
+  const t=(q||query).trim(); if(!t) return;
+  setLoading(true); setResults(null); setError(null); setSearched(t);
+  try {
+    const res = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: t, catalog: CATALOG })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const parsed = JSON.parse((data.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim());
+    setResults(parsed.map(m=>({...PRODUCTS.find(p=>p.id===m.id),reason:m.reason})).filter(p=>p?.id));
+  } catch(e) { setError('Something went wrong with the search. Please try again.'); }
+  finally { setLoading(false); }
+};
   const Dot = ({d}) => <div style={{ width:9, height:9, borderRadius:'50%', background:C.sage, animation:`mgP 1.3s ease-in-out ${d}s infinite alternate` }}/>;
 
   return (
